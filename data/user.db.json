@@ -1,0 +1,29 @@
+{
+    "type": "Simple",
+    "users": [
+        {
+            "id": 1,
+            "firstname": "John",
+            "lastname": "Doe",
+            "username": "John Doe",
+            "password": "change,me",
+            "email": "johndoe@email.com"
+        },
+        {
+            "id": 2,
+            "firstname": "Jane",
+            "lastname": "Doe",
+            "username": "Jane Doe",
+            "password": "please change me",
+            "email": "janedoe@email.com"
+        },
+        {
+            "id": 3,
+            "firstname": "John",
+            "lastname": "Smith",
+            "username": "JohnSmith",
+            "password": "please \"my\" password",
+            "email": "jsmithy@email.com"
+        }
+    ]
+}
