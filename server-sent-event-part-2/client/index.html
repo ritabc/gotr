@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <title>My WebApp</title>
+</head>
+
+<body onload="onloaded();">
+    <div id="head">
+        <h3>My WebApp</h3>
+        <div id="menu">
+            <a href="/">Home</a>
+            <a href="/users">Users</a>
+            <a href="/books">Books</a>
+
+        </div>
+    </div>
+    <div id="main">
+        <div class="item">
+            <h3>Bicycles:</h3>
+            Price: $<span id="bprice"></span>
+            </br>
+            Quantity: <span id="bquantity"></span>
+        </div>
+        <div class="item">
+            <h3>Books:</h3>
+            Price: $<span id="bkprice"></span>
+            </br>
+            Quantity: <span id="bkquantity"></span>
+        </div>
+        <div class="item">
+            <h3>RC Cars:</h3>
+            Price: $<span id="rccprice"></span>
+            </br>
+            Quantity: <span id="rccquantity"></span>
+        </div>
+    </div>
+    <canvas id="myChart"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
