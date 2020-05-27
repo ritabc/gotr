@@ -3,70 +3,80 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/lib/pq"
 )
 
 type User struct {
+	gorm.Model
 	Name     string
-	Username string
+	Username string `gorm:"not null"`
 	Password string
+	Messages []Message
 }
 
-type Profile struct {
-	TZ *time.Location
+// Say users have many messages
+type Message struct {
+	Body   string `gorm:"not null"`
+	User   User
+	UserID uint
+	gorm.Model
 }
-type MyORM struct {
-	db *sql.DB
-}
+
+const (
+	connStr = "user=rbennett dbname=gotr_sql host=localhost sslmode=disable"
+)
 
 func main() {
 	log.Info("Connecting to SQL DB...")
-	connStr := "user=rbennett dbname=gotr_sql host=localhost sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open("postgres", connStr)
+	// db, err := gorm.Open("sqlite3", "test.db") // Easy to use another db for testing purposes
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	var user = &User{"Peter Jones", "ps@email.com", "new-pswd"}
+	var user = &User{Name: "Peter Jones", Username: "ps@email.com", Password: "new-pswd"}
 
-	var orm = &MyORM{db}
-	if err := orm.Create(user); err != nil {
-		log.Fatal(err)
+	// If we don't already have a table users, ask orm to do it for us
+	db.AutoMigrate(&User{}) // table will be created with plural version
+	db.AutoMigrate(&Message{})
+
+	// If we already have a table users:
+	if err := db.Model(&User{}).Create(user).Error; err != nil {
+		log.Warn(err)
 	}
 
-	users, _ := orm.Query()
-	for _, u := range users {
-
+	users, _ := db.Model(&User{}).Find(user).Rows()
+	for users.Next() {
+		u := new(User)
+		db.ScanRows(users, u)
 		fmt.Printf("Got: Name: %v, Username: %v\n", u.Name, u.Username)
 	}
-}
 
-func (o *MyORM) Query() (users []User, err error) {
-	if o == nil {
-		return nil, errors.New("Invalid parameter")
-	}
-	rows, err := o.db.Query("SELECT name, username FROM users")
-	for rows.Next() {
-		u := User{}
-		rows.Scan(&u.Name, &u.Username)
-		users = append(users, u)
-	}
-	return
-}
+	// mesgs := []*Message{
+	// 	&Message{Body: "My message 1"},
+	// 	&Message{Body: "My message 2"},
+	// 	&Message{Body: "My message 3"},
+	// }
 
-func (o *MyORM) Create(u *User) (err error) {
-	if o == nil {
-		return errors.New("Invalid parameter")
-	}
-	_, err = o.db.Exec(`INSERT INTO users(name, username, password) VALUES($1, $2, $3);`, u.Name, u.Username, u.Password)
-	return
+	// // Find first user
+	// db.Model(user).Find(user)
+	// for _, m := range mesgs {
+	// 	db.Model(user).Association("Messages").Append(m)
+	// 	// This would work as well
+	// 	// m.User = user
+	// 	// db.Model(&{Message}).Create(m)
+	// }
+
+	// Find all of user 2's messages:
+	var user_two User
+	db.First(&user_two, 2)
+	var messages []Message
+	db.Model(&user_two).Related(&messages)
+	fmt.Println(&messages)
 }
